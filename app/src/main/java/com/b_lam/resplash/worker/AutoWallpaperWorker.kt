@@ -16,6 +16,7 @@ import com.b_lam.resplash.domain.photo.PhotoRepository
 import com.b_lam.resplash.util.*
 import com.b_lam.resplash.util.Result.Error
 import com.b_lam.resplash.util.Result.Success
+import com.b_lam.resplash.util.Result as ApiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -44,43 +45,7 @@ class AutoWallpaperWorker(
         val contentFilter = inputData.getString(KEY_AUTO_WALLPAPER_CONTENT_FILTER)
 
         try {
-            val result = when (inputData.getString(KEY_AUTO_WALLPAPER_SOURCE)) {
-                Source.FEATURED -> photoRepository.getRandomPhoto(
-                    featured = true,
-                    orientation = orientation,
-                    contentFilter = contentFilter
-                )
-                Source.COLLECTIONS -> {
-                    val collectionId = autoWallpaperRepository.getRandomAutoWallpaperCollectionId()
-                    photoRepository.getRandomPhoto(
-                        collectionId = collectionId,
-                        orientation = orientation,
-                        contentFilter = contentFilter
-                    )
-                }
-                Source.USER -> {
-                    val username = inputData.getString(KEY_AUTO_WALLPAPER_USERNAME)
-                        ?.replace("@", "")
-                    photoRepository.getRandomPhoto(
-                        username = username,
-                        orientation = orientation,
-                        contentFilter = contentFilter
-                    )
-                }
-                Source.SEARCH -> {
-                    val query = inputData.getString(KEY_AUTO_WALLPAPER_SEARCH_TERMS)
-                        ?.split(",")?.random()?.trim()
-                    photoRepository.getRandomPhoto(
-                        query = query,
-                        orientation = orientation,
-                        contentFilter = contentFilter
-                    )
-                }
-                else -> photoRepository.getRandomPhoto(
-                    orientation = orientation,
-                    contentFilter = contentFilter
-                )
-            }
+            val result = getPhotoAvoidingRecentHistory(orientation, contentFilter)
 
             if (result is Success) {
                 if (downloadAndSetWallpaper(result.value)) {
@@ -102,6 +67,77 @@ class AutoWallpaperWorker(
             }
         } catch (e: Throwable) {
             return@withContext Result.failure()
+        }
+    }
+
+    /**
+     * Ask the API for a random photo, and if it is one of the last [RECENT_HISTORY_SIZE] wallpapers
+     * try again a few times before giving up. Unsplash picks the photo, so this is the only way to
+     * avoid handing the user the same wallpaper twice in a row (b-lam/Resplash#167, #182). Small
+     * sources genuinely run out of unseen photos, so a repeat is still used rather than failing.
+     */
+    private suspend fun getPhotoAvoidingRecentHistory(
+        orientation: String?,
+        contentFilter: String?
+    ): ApiResult<Photo> {
+        val recentPhotoIds = try {
+            autoWallpaperRepository.getRecentAutoWallpaperPhotoIds(RECENT_HISTORY_SIZE)
+        } catch (e: Throwable) {
+            emptyList()
+        }
+
+        var result = getRandomPhoto(orientation, contentFilter)
+        var attempt = 1
+        while (attempt < MAX_UNIQUE_PHOTO_ATTEMPTS &&
+            result is Success &&
+            result.value.id in recentPhotoIds
+        ) {
+            result = getRandomPhoto(orientation, contentFilter)
+            attempt++
+        }
+        return result
+    }
+
+    private suspend fun getRandomPhoto(
+        orientation: String?,
+        contentFilter: String?
+    ): ApiResult<Photo> {
+        return when (inputData.getString(KEY_AUTO_WALLPAPER_SOURCE)) {
+            Source.FEATURED -> photoRepository.getRandomPhoto(
+                featured = true,
+                orientation = orientation,
+                contentFilter = contentFilter
+            )
+            Source.COLLECTIONS -> {
+                val collectionId = autoWallpaperRepository.getRandomAutoWallpaperCollectionId()
+                photoRepository.getRandomPhoto(
+                    collectionId = collectionId,
+                    orientation = orientation,
+                    contentFilter = contentFilter
+                )
+            }
+            Source.USER -> {
+                val username = inputData.getString(KEY_AUTO_WALLPAPER_USERNAME)
+                    ?.replace("@", "")
+                photoRepository.getRandomPhoto(
+                    username = username,
+                    orientation = orientation,
+                    contentFilter = contentFilter
+                )
+            }
+            Source.SEARCH -> {
+                val query = inputData.getString(KEY_AUTO_WALLPAPER_SEARCH_TERMS)
+                    ?.split(",")?.random()?.trim()
+                photoRepository.getRandomPhoto(
+                    query = query,
+                    orientation = orientation,
+                    contentFilter = contentFilter
+                )
+            }
+            else -> photoRepository.getRandomPhoto(
+                orientation = orientation,
+                contentFilter = contentFilter
+            )
         }
     }
 
@@ -205,6 +241,9 @@ class AutoWallpaperWorker(
     }
 
     companion object {
+
+        private const val RECENT_HISTORY_SIZE = 50
+        private const val MAX_UNIQUE_PHOTO_ATTEMPTS = 5
 
         private const val AUTO_WALLPAPER_JOB_ID = "auto_wallpaper_job_id"
         const val AUTO_WALLPAPER_SINGLE_JOB_ID = "auto_wallpaper_single_job_id"

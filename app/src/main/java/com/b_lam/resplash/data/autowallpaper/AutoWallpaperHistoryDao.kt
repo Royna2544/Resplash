@@ -11,6 +11,9 @@ interface AutoWallpaperHistoryDao {
     @Query("SELECT * FROM auto_wallpaper_history ORDER BY date DESC")
     fun getAllAutoWallpaperHistory(): DataSource.Factory<Int, AutoWallpaperHistory>
 
+    @Query("SELECT photo_id FROM auto_wallpaper_history ORDER BY date DESC LIMIT :limit")
+    suspend fun getRecentPhotoIds(limit: Int): List<String>
+
     @Query("DELETE FROM auto_wallpaper_history")
     suspend fun deleteAllAutoWallpaperHistory()
 

@@ -38,6 +38,10 @@ class AutoWallpaperRepository(
     suspend fun addToAutoWallpaperHistory(wallpaper: AutoWallpaperHistory) =
         autoWallpaperHistoryDao.insert(wallpaper)
 
+    suspend fun getRecentAutoWallpaperPhotoIds(limit: Int): List<String> = withContext(Dispatchers.IO) {
+        autoWallpaperHistoryDao.getRecentPhotoIds(limit)
+    }
+
     suspend fun deleteAllAutoWallpaperHistory() = withContext(Dispatchers.IO) {
         autoWallpaperHistoryDao.deleteAllAutoWallpaperHistory()
     }
