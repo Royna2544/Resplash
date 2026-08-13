@@ -1,8 +1,7 @@
 package com.b_lam.resplash.ui.photo.zoom
 
-import android.os.Build
 import android.os.Bundle
-import android.view.View
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -30,19 +29,9 @@ class PhotoZoomActivity : BaseActivity(R.layout.activity_photo_zoom) {
             toggleSystemUi(false)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.decorView.setOnApplyWindowInsetsListener { view, windowInsets ->
-                val suppliedInsets = view.onApplyWindowInsets(windowInsets)
-                isSystemUiVisible = suppliedInsets.isVisible(
-                    WindowInsetsCompat.Type.statusBars()
-                            or WindowInsetsCompat.Type.navigationBars()
-                )
-                suppliedInsets
-            }
-        } else {
-            window.decorView.setOnSystemUiVisibilityChangeListener {
-                isSystemUiVisible = (it and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets ->
+            isSystemUiVisible = insets.isVisible(SYSTEM_BARS)
+            insets
         }
 
         binding.zoomImageView.setOnClickListener {
@@ -62,16 +51,15 @@ class PhotoZoomActivity : BaseActivity(R.layout.activity_photo_zoom) {
     private fun toggleSystemUi(showSystemUi: Boolean) {
         WindowInsetsControllerCompat(window, binding.root).let {
             it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            if (showSystemUi) {
-                it.show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
-            } else {
-                it.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
-            }
+            if (showSystemUi) it.show(SYSTEM_BARS) else it.hide(SYSTEM_BARS)
         }
     }
 
     companion object {
 
         const val EXTRA_PHOTO_URL = "extra_photo_url"
+
+        private val SYSTEM_BARS =
+            WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars()
     }
 }

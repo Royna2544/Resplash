@@ -1,5 +1,6 @@
 package com.b_lam.resplash.service
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
@@ -51,6 +52,7 @@ class AutoWallpaperTileService: TileService(), LifecycleOwner, KoinComponent {
      * hand the platform a PendingIntent instead.
      */
     @Suppress("DEPRECATION")
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun openAutoWallpaperSettings() {
         val intent = Intent(this, AutoWallpaperSettingsActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP

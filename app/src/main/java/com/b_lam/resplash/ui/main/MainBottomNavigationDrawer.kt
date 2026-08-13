@@ -16,7 +16,6 @@ import com.b_lam.resplash.databinding.MainBottomNavigationDrawerProfileHeaderBin
 import com.b_lam.resplash.util.loadProfilePicture
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.internal.NavigationMenuView
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class MainBottomNavigationDrawer : BottomSheetDialogFragment() {
@@ -62,7 +61,8 @@ class MainBottomNavigationDrawer : BottomSheetDialogFragment() {
         navigationDrawerContentBinding.headerNavigationView.setNavigationItemSelectedListener {
             onNavigationItemSelected(it)
         }
-        (navigationDrawerContentBinding.headerNavigationView.getChildAt(0) as? NavigationMenuView)
+        // The menu is rendered by a scrolling child view; the drawer already scrolls as a whole
+        (navigationDrawerContentBinding.headerNavigationView.getChildAt(0) as? ViewGroup)
             ?.isVerticalScrollBarEnabled = false
         navigationDrawerBinding.expandableProfile.setOnExpandChangeListener { isExpanded ->
             val drawableRes = if (isExpanded) R.drawable.ic_expand_less_18dp else R.drawable.ic_expand_more_18dp

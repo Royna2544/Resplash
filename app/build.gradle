@@ -83,7 +83,10 @@ android {
     }
 
     lint {
-        disable 'MissingTranslation'
+        // Translations come from contributors and are always going to lag behind
+        disable 'MissingTranslation', 'MissingQuantity'
+        abortOnError true
+        warningsAsErrors false
     }
 }
 
