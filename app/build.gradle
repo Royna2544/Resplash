@@ -1,37 +1,55 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.android.gms.oss-licenses-plugin'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-parcelize'
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    alias libs.plugins.android.application
+    alias libs.plugins.kotlin.parcelize
+    alias libs.plugins.ksp
+    alias libs.plugins.oss.licenses
+}
+
+// Firebase needs a google-services.json that is not checked into version control.
+// Keep the build working for contributors who do not have one.
+def googleServicesAvailable = file('google-services.json').exists()
+if (googleServicesAvailable) {
+    apply plugin: libs.plugins.google.services.get().pluginId
+    apply plugin: libs.plugins.firebase.crashlytics.get().pluginId
+} else {
+    logger.lifecycle('google-services.json not found, building without the Firebase Gradle plugins')
+}
 
 // Load local properties with API keys
 def localProperties = new Properties()
-localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+/**
+ * Values in local.properties are already quoted so that they can be passed to buildConfigField
+ * verbatim. Fall back to an empty string literal when a key is missing so that the project can
+ * still be built and inspected without a set of Unsplash API keys.
+ */
+def secret = { String key -> localProperties.getProperty(key) ?: '""' }
 
 android {
-    compileSdkVersion 34
+    namespace 'com.b_lam.resplash'
+    compileSdk libs.versions.compileSdk.get() as int
+
     defaultConfig {
         applicationId 'com.b_lam.resplash'
-        minSdkVersion 26
-        targetSdkVersion 34
+        minSdk libs.versions.minSdk.get() as int
+        targetSdk libs.versions.targetSdk.get() as int
         versionCode 63
         versionName '3.4.3'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        buildConfigField("String", "RELEASE_APP_ID", localProperties['releaseAppId'])
-        buildConfigField("String", "RELEASE_SECRET", localProperties['releaseSecret'])
-        buildConfigField("String", "DEV_APP_ID", localProperties['devAppId'])
-        buildConfigField("String", "DEV_SECRET", localProperties['devSecret'])
-        buildConfigField("String", "GOOGLE_PLAY_LICENSE_KEY", localProperties['googlePlayLicenseKey'])
-        renderscriptTargetApi 33 as int
-        renderscriptSupportModeEnabled true
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
+        buildConfigField 'String', 'RELEASE_APP_ID', secret('releaseAppId')
+        buildConfigField 'String', 'RELEASE_SECRET', secret('releaseSecret')
+        buildConfigField 'String', 'DEV_APP_ID', secret('devAppId')
+        buildConfigField 'String', 'DEV_SECRET', secret('devSecret')
+        buildConfigField 'String', 'GOOGLE_PLAY_LICENSE_KEY', secret('googlePlayLicenseKey')
+        buildConfigField 'boolean', 'FIREBASE_ENABLED', googleServicesAvailable.toString()
     }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -43,135 +61,142 @@ android {
             applicationIdSuffix '.debug'
         }
     }
+
     buildFeatures {
         viewBinding true
-        buildConfig = true
+        buildConfig true
     }
+
     bundle {
         language {
             enableSplit = false
         }
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
+
     lint {
         disable 'MissingTranslation'
     }
-    namespace 'com.b_lam.resplash'
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
+ksp {
+    arg('room.schemaLocation', "$projectDir/schemas".toString())
+    arg('room.generateKotlin', 'true')
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     // Support libraries
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.browser:browser:1.5.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.core:core-splashscreen:1.0.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.5'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.paging:paging-runtime-ktx:2.1.2'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.work:work-runtime-ktx:2.9.1'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.cardview
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.core.splashscreen
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.paging.runtime.ktx
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.androidx.work.runtime.ktx
 
     // Lifecycle
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-service:2.5.1'
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.service
 
     // Room
-    implementation 'androidx.room:room-runtime:2.5.0'
-    implementation 'androidx.room:room-ktx:2.5.0'
-    kapt 'androidx.room:room-compiler:2.5.0'
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.androidx.room.compiler
 
     // Material components
-    implementation 'com.google.android.material:material:1.9.0-alpha02'
+    implementation libs.material
 
     // Billing
-    implementation 'com.android.billingclient:billing-ktx:6.0.1'
+    implementation libs.billing.ktx
 
     // Kotlin coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
 
     // OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.10'
+    implementation libs.okhttp
+    implementation libs.okhttp.logging.interceptor
 
     // Okio
-    implementation 'com.squareup.okio:okio:3.2.0'
+    implementation libs.okio
 
     // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
+    implementation libs.retrofit
+    implementation libs.retrofit.converter.moshi
 
     // Moshi
-    implementation 'com.squareup.moshi:moshi:1.14.0'
-    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.14.0'
+    implementation libs.moshi
+    ksp libs.moshi.kotlin.codegen
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.13.2'
-    implementation 'jp.wasabeef:glide-transformations:4.3.0'
-    kapt 'com.github.bumptech.glide:compiler:4.13.2'
+    implementation libs.glide
+    ksp libs.glide.ksp
 
     // Koin
-    implementation 'io.insert-koin:koin-android:3.3.3'
-    implementation 'io.insert-koin:koin-androidx-workmanager:3.3.3'
+    implementation libs.koin.android
+    implementation libs.koin.androidx.workmanager
 
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:31.2.0')
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.2.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.3.5'
-    implementation('com.google.firebase:firebase-inappmessaging-ktx:20.1.3', {
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.analytics
+    implementation libs.firebase.crashlytics
+    implementation(libs.firebase.inappmessaging) {
         exclude group: 'io.grpc', module: 'grpc-okhttp'
-    })
+    }
     // Workaround for https://github.com/firebase/firebase-android-sdk/issues/2642
-    implementation 'io.grpc:grpc-okhttp:1.52.1'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.4.4'
-    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+    implementation libs.grpc.okhttp
+    implementation libs.firebase.firestore
 
     // View binding
-    implementation 'com.github.kirich1409:viewbindingpropertydelegate:1.5.6'
-    
+    implementation libs.viewbindingpropertydelegate
+
     // Lottie
-    implementation 'com.airbnb.android:lottie:5.2.0'
+    implementation libs.lottie
 
     // PhotoView
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation libs.photoview
 
     // Pager indicator
-    implementation 'com.github.intik:overflow-pager-indicator:3.1.0'
+    implementation libs.overflow.pager.indicator
 
     // PrettyTime
-    implementation 'org.ocpsoft.prettytime:prettytime:5.0.4.Final'
+    implementation libs.prettytime
 
     // Open source notices
-    implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
+    implementation libs.play.services.oss.licenses
 
     // Muzei
-    implementation 'com.google.android.apps.muzei:muzei-api:3.4.1'
+    implementation libs.muzei.api
 
     // LeakCanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
+    debugImplementation libs.leakcanary.android
 
     // Unit tests
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.espresso.core
+    androidTestImplementation libs.androidx.test.ext.junit
 
     // Room testing
-    androidTestImplementation "androidx.room:room-testing:2.5.0"
+    androidTestImplementation libs.androidx.room.testing
 }

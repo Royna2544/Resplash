@@ -65,8 +65,8 @@ class PhotoAdapter(
 //        super.onViewRecycled(holder)
 //        val photoImageView: ImageView? = holder.itemView.findViewById(R.id.photo_image_view)
 //        val userImageView: ImageView? = holder.itemView.findViewById(R.id.user_image_view)
-//        photoImageView?.let { GlideApp.with(it.context).clear(it) }
-//        userImageView?.let { GlideApp.with(it.context).clear(it) }
+//        photoImageView?.let { Glide.with(it.context).clear(it) }
+//        userImageView?.let { Glide.with(it.context).clear(it) }
 //    }
 
     interface ItemEventCallback {

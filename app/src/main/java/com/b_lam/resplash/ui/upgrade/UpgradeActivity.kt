@@ -7,6 +7,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.b_lam.resplash.R
 import com.b_lam.resplash.databinding.ActivityUpgradeBinding
 import com.b_lam.resplash.ui.base.BaseActivity
+import com.b_lam.resplash.util.isFirebaseAvailable
 import com.b_lam.resplash.util.livedata.observeEvent
 import com.b_lam.resplash.util.loadBlurredImage
 import com.b_lam.resplash.util.setupActionBar
@@ -24,12 +25,14 @@ class UpgradeActivity : BaseActivity(R.layout.activity_upgrade) {
 
     override val binding: ActivityUpgradeBinding by viewBinding()
 
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private var firebaseAnalytics: FirebaseAnalytics? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        firebaseAnalytics = Firebase.analytics
+        if (isFirebaseAvailable) {
+            firebaseAnalytics = Firebase.analytics
+        }
 
         setupActionBar(R.id.toolbar) {
             title = getString(R.string.resplash_pro)
@@ -64,7 +67,7 @@ class UpgradeActivity : BaseActivity(R.layout.activity_upgrade) {
     private fun observeBillingResponse() {
         viewModel.billingMessageLiveData.observeEvent(this) { toast(it) }
         viewModel.billingErrorLiveData.observeEvent(this) {
-            firebaseAnalytics.logEvent("billing_error") {
+            firebaseAnalytics?.logEvent("billing_error") {
                 param("response_code", "${it.responseCode}")
                 param("debug_message", it.debugMessage)
             }

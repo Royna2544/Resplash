@@ -9,7 +9,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.ui.photo.detail.PhotoDetailActivity
 
@@ -122,9 +122,9 @@ class NotificationManager(private val context: Context) {
             title?.let { setContentTitle(it) }
             subtitle?.let { setContentText(it) }
             previewUrl?.let {
-                val futureTarget = GlideApp.with(context).asBitmap().load(previewUrl).submit()
+                val futureTarget = Glide.with(context).asBitmap().load(previewUrl).submit()
                 setLargeIcon(futureTarget.get())
-                GlideApp.with(context).clear(futureTarget)
+                Glide.with(context).clear(futureTarget)
             }
             setOngoing(persist)
         }

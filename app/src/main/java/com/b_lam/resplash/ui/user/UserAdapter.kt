@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.data.photo.model.Photo
 import com.b_lam.resplash.data.user.model.User
@@ -26,7 +26,7 @@ class UserAdapter(
     override fun onViewRecycled(holder: UserViewHolder) {
         super.onViewRecycled(holder)
         val userImageView: ImageView? = holder.itemView.findViewById(R.id.user_image_view)
-        userImageView?.let { GlideApp.with(it.context).clear(it) }
+        userImageView?.let { Glide.with(it.context).clear(it) }
     }
 
     interface ItemEventCallback {

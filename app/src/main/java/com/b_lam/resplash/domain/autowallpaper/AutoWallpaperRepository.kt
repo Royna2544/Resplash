@@ -10,6 +10,7 @@ import com.b_lam.resplash.data.autowallpaper.AutoWallpaperHistoryDao
 import com.b_lam.resplash.data.autowallpaper.model.AutoWallpaperCollection
 import com.b_lam.resplash.data.autowallpaper.model.AutoWallpaperHistory
 import com.b_lam.resplash.data.collection.model.Collection
+import com.b_lam.resplash.util.isFirebaseAvailable
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -20,7 +21,7 @@ import kotlinx.coroutines.withContext
 class AutoWallpaperRepository(
     private val autoWallpaperHistoryDao: AutoWallpaperHistoryDao,
     private val autoWallpaperCollectionDao: AutoWallpaperCollectionDao,
-    private val fireStore: FirebaseFirestore = Firebase.firestore
+    private val fireStore: FirebaseFirestore? = if (isFirebaseAvailable) Firebase.firestore else null
 ) {
 
     fun getAutoWallpaperHistory(): LiveData<PagedList<AutoWallpaperHistory>> {
@@ -92,9 +93,9 @@ class AutoWallpaperRepository(
         }
     }
 
-    fun getFeaturedCollections(): DocumentReference =
-        fireStore.document("/autowallpaper/featured_v2")
+    fun getFeaturedCollections(): DocumentReference? =
+        fireStore?.document("/autowallpaper/featured_v2")
 
-    fun getPopularCollections(): DocumentReference =
-        fireStore.document("/autowallpaper/popular_v2")
+    fun getPopularCollections(): DocumentReference? =
+        fireStore?.document("/autowallpaper/popular_v2")
 }

@@ -6,6 +6,7 @@ import com.b_lam.resplash.di.appModules
 import com.b_lam.resplash.domain.SharedPreferencesRepository
 import com.b_lam.resplash.util.applyLanguage
 import com.b_lam.resplash.util.applyTheme
+import com.bumptech.glide.Glide
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -39,11 +40,11 @@ class ResplashApplication : Application() {
 
     override fun onLowMemory() {
         super.onLowMemory()
-        GlideApp.get(this).clearMemory()
+        Glide.get(this).clearMemory()
     }
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        GlideApp.get(this).trimMemory(level)
+        Glide.get(this).trimMemory(level)
     }
 }

@@ -4,15 +4,15 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.data.photo.model.Photo
 import com.b_lam.resplash.data.user.model.User
 import com.b_lam.resplash.ui.widget.AspectRatioImageView
+import com.b_lam.resplash.util.glide.BlurTransformation
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import jp.wasabeef.glide.transformations.BlurTransformation
 
 const val CROSS_FADE_DURATION = 350
 
@@ -24,7 +24,7 @@ fun ImageView.loadPhotoUrl(
 ) {
     colorInt?.let { background = ColorDrawable(it) }
     colorString?.let { background = ColorDrawable(Color.parseColor(it)) }
-    GlideApp.with(context)
+    Glide.with(context)
         .load(url)
         .transition(DrawableTransitionOptions.withCrossFade(CROSS_FADE_DURATION))
         .addListener(requestListener)
@@ -40,13 +40,13 @@ fun ImageView.loadPhotoUrlWithThumbnail(
     requestListener: RequestListener<Drawable>? = null
 ) {
     color?.let { background = ColorDrawable(Color.parseColor(it)) }
-    GlideApp.with(context)
+    Glide.with(context)
         .load(url)
         .thumbnail(
             if (centerCrop) {
-                GlideApp.with(context).load(thumbnailUrl).centerCrop()
+                Glide.with(context).load(thumbnailUrl).centerCrop()
             } else {
-                GlideApp.with(context).load(thumbnailUrl)
+                Glide.with(context).load(thumbnailUrl)
             }
         )
         .transition(DrawableTransitionOptions.withCrossFade(CROSS_FADE_DURATION))
@@ -71,7 +71,7 @@ fun ImageView.loadBlurredImage(
     requestListener: RequestListener<Drawable>? = null
 ) {
     color?.let { background = ColorDrawable(Color.parseColor(it)) }
-    GlideApp.with(context)
+    Glide.with(context)
         .load(url)
         .transition(DrawableTransitionOptions.withCrossFade(CROSS_FADE_DURATION))
         .addListener(requestListener)
@@ -85,7 +85,7 @@ fun ImageView.loadProfilePicture(user: User) {
 }
 
 fun ImageView.loadProfilePicture(url: String?) {
-    GlideApp.with(context)
+    Glide.with(context)
         .load(url)
         .placeholder(R.drawable.user_profile_picture_small_placeholder)
         .circleCrop()

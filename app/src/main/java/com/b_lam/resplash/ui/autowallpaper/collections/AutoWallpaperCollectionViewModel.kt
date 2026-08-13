@@ -87,8 +87,8 @@ class AutoWallpaperCollectionViewModel(
         if (retryCount <= MAX_RETRIES) {
             autoWallpaperRepository
                 .getFeaturedCollections()
-                .get(source)
-                .addOnSuccessListener { documentSnapshot ->
+                ?.get(source)
+                ?.addOnSuccessListener { documentSnapshot ->
                     if (!documentSnapshot.metadata.isFromCache)
                         sharedPreferencesRepository.lastFeaturedCollectionsFetch =
                             System.currentTimeMillis()
@@ -96,7 +96,7 @@ class AutoWallpaperCollectionViewModel(
                         liveData.postValue(it)
                     }
                 }
-                .addOnFailureListener { exception ->
+                ?.addOnFailureListener { exception ->
                     error("Error getting documents", exception)
                     getFeaturedCollections(Source.SERVER, liveData, retryCount + 1)
                 }
@@ -111,8 +111,8 @@ class AutoWallpaperCollectionViewModel(
         if (retryCount <= MAX_RETRIES) {
             autoWallpaperRepository
                 .getPopularCollections()
-                .get(source)
-                .addOnSuccessListener { documentSnapshot ->
+                ?.get(source)
+                ?.addOnSuccessListener { documentSnapshot ->
                     if (!documentSnapshot.metadata.isFromCache)
                         sharedPreferencesRepository.lastPopularCollectionsFetch =
                             System.currentTimeMillis()
@@ -120,7 +120,7 @@ class AutoWallpaperCollectionViewModel(
                         liveData.postValue(it)
                     }
                 }
-                .addOnFailureListener { exception ->
+                ?.addOnFailureListener { exception ->
                     error("Error getting documents", exception)
                     getPopularCollections(Source.SERVER, liveData, retryCount + 1)
                 }

@@ -74,9 +74,6 @@
     public <methods>;
 }
 
--keep class android.support.v8.renderscript.** { *; }
--keep class androidx.renderscript.** { *; }
-
 -keep class org.ocpsoft.prettytime.** { *; }
 -dontwarn org.ocpsoft.prettytime.**
 

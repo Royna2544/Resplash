@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,10 +26,10 @@ class SettingsViewModel(private val context: Context) : ViewModel() {
     }
 
     private suspend fun clearCache() = withContext(Dispatchers.Default) {
-        GlideApp.get(context).clearDiskCache()
+        Glide.get(context).clearDiskCache()
     }
 
-    private fun getGlideCacheSize() = GlideApp.getPhotoCacheDir(context)?.dirSize()
+    private fun getGlideCacheSize() = Glide.getPhotoCacheDir(context)?.dirSize()
 
     private fun File.dirSize(): Long {
         if (this.exists()) {

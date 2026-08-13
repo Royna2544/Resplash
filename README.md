@@ -29,6 +29,9 @@ The internet’s source of freely-usable images. Powered by creators everywhere.
 
 # Build
 
+Requires JDK 17 or newer (JDK 21 recommended, the JBR shipped with Android Studio works) and the
+Android SDK platform 37. Everything else is downloaded by the Gradle wrapper.
+
 Note that in order to access the Unsplash API, you must at a minimum:
 
 - Create a developer account at: [https://unsplash.com/developers](https://unsplash.com/developers)
@@ -44,7 +47,10 @@ releaseSecret=""
 googlePlayLicenseKey=""
 ```
 
-To build the app, you will need to get a `google-services.json` file from Firebase:
+The app builds without a `google-services.json`; the Firebase Gradle plugins are only applied when
+one is present, and the Firebase-backed features (analytics, Crashlytics, in-app messaging and the
+featured Auto Wallpaper collections) are skipped at runtime otherwise. To build with Firebase
+enabled:
 
 - Go to [Firebase](https://console.firebase.google.com) and create a new project
 - In the Firebase console, add an Android app to the project with the package name `com.b_lam.resplash.debug`

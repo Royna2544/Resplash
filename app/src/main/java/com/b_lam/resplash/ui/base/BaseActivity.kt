@@ -70,7 +70,7 @@ abstract class BaseActivity(@LayoutRes contentLayoutId: Int) : AppCompatActivity
             val taskDescription = TaskDescription(
                 getString(R.string.app_name),
                 R.mipmap.ic_launcher,
-                getThemeAttrColor(this, R.attr.colorSurface)
+                getThemeAttrColor(this, com.google.android.material.R.attr.colorSurface)
             )
             setTaskDescription(taskDescription)
         } else {
@@ -78,7 +78,7 @@ abstract class BaseActivity(@LayoutRes contentLayoutId: Int) : AppCompatActivity
             val taskDescription = TaskDescription(
                 getString(R.string.app_name),
                 icon,
-                getThemeAttrColor(this, R.attr.colorSurface)
+                getThemeAttrColor(this, com.google.android.material.R.attr.colorSurface)
             )
             setTaskDescription(taskDescription)
             icon?.recycle()

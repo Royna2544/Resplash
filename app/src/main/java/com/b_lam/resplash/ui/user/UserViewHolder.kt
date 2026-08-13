@@ -5,7 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.data.user.model.User
 import com.b_lam.resplash.databinding.ItemUserDefaultBinding
@@ -42,7 +42,7 @@ class UserViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
                                 )
                                 imageView.setOnClickListener { callback.onPhotoClick(photo) }
                             } ?: run {
-                                GlideApp.with(itemView.context).clear(imageView)
+                                Glide.with(itemView.context).clear(imageView)
                                 imageView.setOnClickListener(null)
                             }
                         }

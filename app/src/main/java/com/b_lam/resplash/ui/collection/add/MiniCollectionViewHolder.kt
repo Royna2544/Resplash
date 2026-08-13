@@ -5,7 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.data.collection.model.Collection
 import com.b_lam.resplash.databinding.ItemCollectionMiniBinding
@@ -26,7 +26,7 @@ class MiniCollectionViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
                     collectionImageView.loadPhotoUrlWithThumbnail(
                         photo.urls.regular, photo.urls.thumb, photo.color, true)
                 } ?: run {
-                    GlideApp.with(itemView.context).clear(collectionImageView)
+                    Glide.with(itemView.context).clear(collectionImageView)
                     collectionImageView.setBackgroundColor(
                         ContextCompat.getColor(itemView.context, R.color.transparent))
                 }

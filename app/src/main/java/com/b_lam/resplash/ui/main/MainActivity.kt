@@ -35,6 +35,7 @@ import com.b_lam.resplash.ui.upgrade.UpgradeActivity
 import com.b_lam.resplash.ui.user.UserActivity
 import com.b_lam.resplash.ui.user.edit.EditProfileActivity
 import com.b_lam.resplash.util.CustomTabsHelper
+import com.b_lam.resplash.util.isFirebaseAvailable
 import com.b_lam.resplash.util.livedata.observeEvent
 import com.b_lam.resplash.util.loadPhotoUrl
 import com.b_lam.resplash.util.requestPermission
@@ -92,15 +93,19 @@ class MainActivity : BaseActivity(R.layout.activity_main) {
         super.onStart()
         viewModel.refreshUserProfile()
 
-        val inAppMessagingDisplay = FirebaseInAppMessagingDisplay { inAppMessage, callbacks ->
-            showInAppMessagingDialog(inAppMessage, callbacks)
+        if (isFirebaseAvailable) {
+            val inAppMessagingDisplay = FirebaseInAppMessagingDisplay { inAppMessage, callbacks ->
+                showInAppMessagingDialog(inAppMessage, callbacks)
+            }
+            Firebase.inAppMessaging.setMessageDisplayComponent(inAppMessagingDisplay)
         }
-        Firebase.inAppMessaging.setMessageDisplayComponent(inAppMessagingDisplay)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Firebase.inAppMessaging.clearDisplayListener()
+        if (isFirebaseAvailable) {
+            Firebase.inAppMessaging.clearDisplayListener()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

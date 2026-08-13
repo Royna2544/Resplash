@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import com.b_lam.resplash.GlideApp
+import com.bumptech.glide.Glide
 import com.b_lam.resplash.R
 import com.b_lam.resplash.data.autowallpaper.model.AutoWallpaperHistory
 import com.b_lam.resplash.domain.SharedPreferencesRepository
@@ -35,8 +35,8 @@ class AutoWallpaperHistoryAdapter(
         super.onViewRecycled(holder)
         val photoImageView: ImageView? = holder.itemView.findViewById(R.id.photo_image_view)
         val userImageView: ImageView? = holder.itemView.findViewById(R.id.user_image_view)
-        photoImageView?.let { GlideApp.with(it.context).clear(it) }
-        userImageView?.let { GlideApp.with(it.context).clear(it) }
+        photoImageView?.let { Glide.with(it.context).clear(it) }
+        userImageView?.let { Glide.with(it.context).clear(it) }
     }
 
     interface ItemEventCallback {
