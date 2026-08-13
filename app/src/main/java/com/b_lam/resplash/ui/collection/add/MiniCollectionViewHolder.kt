@@ -24,7 +24,8 @@ class MiniCollectionViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
             collection?.let {
                 collection.cover_photo?.let { photo ->
                     collectionImageView.loadPhotoUrlWithThumbnail(
-                        photo.urls.regular, photo.urls.thumb, photo.color, true)
+                        photo.urls.regular, photo.urls.thumb, photo.color, photo.blur_hash,
+                        centerCrop = true)
                 } ?: run {
                     Glide.with(itemView.context).clear(collectionImageView)
                     collectionImageView.setBackgroundColor(

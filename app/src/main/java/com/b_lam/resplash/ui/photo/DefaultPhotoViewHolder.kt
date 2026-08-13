@@ -34,7 +34,7 @@ class DefaultPhotoViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
                 }
                 val url = getPhotoUrl(photo, loadQuality)
                 photoImageView.setAspectRatio(photo.width, photo.height)
-                photoImageView.loadPhotoUrlWithThumbnail(url, photo.urls.thumb, photo.color)
+                photoImageView.loadPhotoUrlWithThumbnail(url, photo.urls.thumb, photo.color, photo.blur_hash)
                 photoImageView.setOnClickListener { callback.onPhotoClick(photo) }
                 if (longPressDownload) {
                     photoImageView.setOnLongClickListener {

@@ -24,7 +24,8 @@ class GridCollectionViewHolder(parent: View) : RecyclerView.ViewHolder(parent) {
                 collection.cover_photo?.let { photo ->
                     val url = getPhotoUrl(photo, loadQuality)
                     collectionImageView.minimumHeight = itemView.resources.getDimensionPixelSize(R.dimen.collection_max_height)
-                    collectionImageView.loadPhotoUrlWithThumbnail(url, photo.urls.thumb, photo.color, true)
+                    collectionImageView.loadPhotoUrlWithThumbnail(
+                        url, photo.urls.thumb, photo.color, photo.blur_hash, centerCrop = true)
                 }
                 collectionNameTextView.text = collection.title
                 collectionCountTextView.text = itemView.resources.getQuantityString(

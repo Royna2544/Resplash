@@ -140,6 +140,7 @@ class PhotoDetailActivity :
             url,
             photo.urls.thumb,
             photo.color,
+            photo.blur_hash,
             centerCrop = true
         )
         binding.photoImageView.setOnClickListener {
