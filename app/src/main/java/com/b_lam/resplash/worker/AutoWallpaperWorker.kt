@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.graphics.BitmapFactory
 import android.graphics.Rect
 import androidx.work.*
 import com.b_lam.resplash.data.autowallpaper.model.AutoWallpaperHistory
@@ -19,6 +20,7 @@ import com.b_lam.resplash.util.Result as ApiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
@@ -144,31 +146,69 @@ class AutoWallpaperWorker(
     private suspend fun downloadAndSetWallpaper(photo: Photo): Boolean {
         val quality = inputData.getString(KEY_AUTO_WALLPAPER_QUALITY)
         val url = getWallpaperUrl(photo, quality)
-        try {
-            downloadService.downloadFile(url).byteStream().use {
-                // The image is already exactly the size the wallpaper wants, so there is nothing
-                // left to crop and the photo's own dimensions no longer describe what was fetched.
-                val centerCropRect =
-                    if (quality != QUALITY_SCREEN &&
-                        inputData.getString(KEY_AUTO_WALLPAPER_CROP) != "none" &&
-                        (photo.width != null && photo.height != null)) {
-                        getCropHintRect(
-                            min(screenWidth, screenHeight).toDouble(),
-                            max(screenWidth, screenHeight).toDouble(),
-                            photo.width.toDouble(),
-                            photo.height.toDouble())
-                    } else {
-                        null
-                    }
-                val screenSelect = inputData.getInt(KEY_AUTO_WALLPAPER_SELECT_SCREEN,
-                    WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+        val file = File(context.cacheDir, WALLPAPER_DOWNLOAD_FILE)
+        return try {
+            if (!downloadWallpaper(url, file)) return false
+
+            // The image is already exactly the size the wallpaper wants, so there is nothing
+            // left to crop and the photo's own dimensions no longer describe what was fetched.
+            val centerCropRect =
+                if (quality != QUALITY_SCREEN &&
+                    inputData.getString(KEY_AUTO_WALLPAPER_CROP) != "none" &&
+                    (photo.width != null && photo.height != null)) {
+                    getCropHintRect(
+                        min(screenWidth, screenHeight).toDouble(),
+                        max(screenWidth, screenHeight).toDouble(),
+                        photo.width.toDouble(),
+                        photo.height.toDouble())
+                } else {
+                    null
+                }
+            val screenSelect = inputData.getInt(KEY_AUTO_WALLPAPER_SELECT_SCREEN,
+                WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+            file.inputStream().use {
                 WallpaperManager.getInstance(context).setStream(it, centerCropRect,
                     true, screenSelect)
-                return true
             }
+            true
         } catch (e: Throwable) {
+            error("Error setting wallpaper", e)
+            false
+        } finally {
+            file.delete()
+        }
+    }
+
+    /**
+     * Download the photo to [file] and check that what arrived is a whole image.
+     *
+     * The photo used to be piped from the network straight into WallpaperManager.setStream().
+     * That call replaces the stored wallpaper as it reads, so a transfer that died half way -
+     * a dropped connection, a closed socket - left a truncated image in the system's wallpaper
+     * storage. A partial JPEG still decodes far enough to look plausible at first, and the device
+     * falls back to its built-in wallpaper whenever the framework next decodes the file for real.
+     *
+     * Downloading first means a failed transfer costs a cache file instead of the wallpaper.
+     */
+    private suspend fun downloadWallpaper(url: String, file: File): Boolean {
+        val body = downloadService.downloadFile(url)
+        val expectedBytes = body.contentLength()
+        val writtenBytes = body.byteStream().use { input ->
+            file.outputStream().use { output -> input.copyTo(output) }
+        }
+
+        if (expectedBytes >= 0 && writtenBytes != expectedBytes) {
+            error("Wallpaper download was cut short at $writtenBytes of $expectedBytes bytes")
             return false
         }
+
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, options)
+        if (options.outWidth <= 0 || options.outHeight <= 0) {
+            error("Wallpaper download is not a decodable image")
+            return false
+        }
+        return true
     }
 
     /**
@@ -271,6 +311,7 @@ class AutoWallpaperWorker(
     companion object {
 
         private const val QUALITY_SCREEN = "screen"
+        private const val WALLPAPER_DOWNLOAD_FILE = "auto_wallpaper.tmp"
 
         private const val RECENT_HISTORY_SIZE = 50
         private const val MAX_UNIQUE_PHOTO_ATTEMPTS = 5
