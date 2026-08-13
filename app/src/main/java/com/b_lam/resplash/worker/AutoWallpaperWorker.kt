@@ -5,7 +5,6 @@ import android.app.WallpaperManager
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.graphics.Rect
-import android.os.Build
 import androidx.work.*
 import com.b_lam.resplash.data.autowallpaper.model.AutoWallpaperHistory
 import com.b_lam.resplash.data.download.DownloadService
@@ -19,6 +18,7 @@ import com.b_lam.resplash.util.Result.Success
 import com.b_lam.resplash.util.Result as ApiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
@@ -142,33 +142,61 @@ class AutoWallpaperWorker(
     }
 
     private suspend fun downloadAndSetWallpaper(photo: Photo): Boolean {
-        val url = getPhotoUrl(photo, inputData.getString(KEY_AUTO_WALLPAPER_QUALITY))
+        val quality = inputData.getString(KEY_AUTO_WALLPAPER_QUALITY)
+        val url = getWallpaperUrl(photo, quality)
         try {
             downloadService.downloadFile(url).byteStream().use {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    val centerCropRect =
-                        if (inputData.getString(KEY_AUTO_WALLPAPER_CROP) != "none" &&
-                            (photo.width != null && photo.height != null)) {
-                            getCropHintRect(
-                                min(screenWidth, screenHeight).toDouble(),
-                                max(screenWidth, screenHeight).toDouble(),
-                                photo.width.toDouble(),
-                                photo.height.toDouble())
-                        } else {
-                            null
-                        }
-                    val screenSelect = inputData.getInt(KEY_AUTO_WALLPAPER_SELECT_SCREEN,
-                        WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
-                    WallpaperManager.getInstance(context).setStream(it, centerCropRect,
-                        true, screenSelect)
-                } else {
-                    WallpaperManager.getInstance(context).setStream(it)
-                }
+                // The image is already exactly the size the wallpaper wants, so there is nothing
+                // left to crop and the photo's own dimensions no longer describe what was fetched.
+                val centerCropRect =
+                    if (quality != QUALITY_SCREEN &&
+                        inputData.getString(KEY_AUTO_WALLPAPER_CROP) != "none" &&
+                        (photo.width != null && photo.height != null)) {
+                        getCropHintRect(
+                            min(screenWidth, screenHeight).toDouble(),
+                            max(screenWidth, screenHeight).toDouble(),
+                            photo.width.toDouble(),
+                            photo.height.toDouble())
+                    } else {
+                        null
+                    }
+                val screenSelect = inputData.getInt(KEY_AUTO_WALLPAPER_SELECT_SCREEN,
+                    WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+                WallpaperManager.getInstance(context).setStream(it, centerCropRect,
+                    true, screenSelect)
                 return true
             }
         } catch (e: Throwable) {
             return false
         }
+    }
+
+    /**
+     * The URL to fetch the wallpaper from.
+     *
+     * For the "screen size" quality the raw photo is resized by Unsplash's image service to the
+     * size the wallpaper is actually displayed at. That is a fraction of the bytes of a full
+     * resolution photo (b-lam/Resplash#126) and the picture is scaled once, by the server, instead
+     * of being downsampled by the wallpaper service (b-lam/Resplash#121).
+     */
+    private fun getWallpaperUrl(photo: Photo, quality: String?): String {
+        if (quality != QUALITY_SCREEN) return getPhotoUrl(photo, quality)
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        // Launchers ask for a canvas wider than the screen so the wallpaper can scroll
+        val width = wallpaperManager.desiredMinimumWidth.takeIf { it > 0 } ?: screenWidth
+        val height = wallpaperManager.desiredMinimumHeight.takeIf { it > 0 } ?: screenHeight
+
+        return photo.urls.raw.toHttpUrlOrNull()
+            ?.newBuilder()
+            ?.setQueryParameter("w", width.toString())
+            ?.setQueryParameter("h", height.toString())
+            ?.setQueryParameter("fit", "crop")
+            ?.setQueryParameter("fm", "jpg")
+            ?.setQueryParameter("q", "85")
+            ?.build()
+            ?.toString()
+            ?: getPhotoUrl(photo, null)
     }
 
     private fun getCropHintRect(
@@ -241,6 +269,8 @@ class AutoWallpaperWorker(
     }
 
     companion object {
+
+        private const val QUALITY_SCREEN = "screen"
 
         private const val RECENT_HISTORY_SIZE = 50
         private const val MAX_UNIQUE_PHOTO_ATTEMPTS = 5

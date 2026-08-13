@@ -60,8 +60,8 @@
 
         <ListPreference app:key="wallpaper_quality"
             app:title="@string/wallpaper_quality"
-            app:entries="@array/quality_options"
-            app:entryValues="@array/quality_values"
+            app:entries="@array/wallpaper_quality_options"
+            app:entryValues="@array/wallpaper_quality_values"
             app:defaultValue="@string/default_wallpaper_quality_value"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>

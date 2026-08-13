@@ -103,6 +103,7 @@
     <string name="downloader_default">Resplash downloader</string>
     <string name="downloader_system">System downloader</string>
     <string name="quality">Quality</string>
+    <string name="quality_screen">Screen size</string>
     <string name="quality_raw">Raw</string>
     <string name="quality_full">Full</string>
     <string name="quality_regular">Regular</string>

@@ -100,6 +100,24 @@
     </string-array>
     <string name="default_load_quality_value" translatable="false">regular</string>
     <string name="default_download_quality_value" translatable="false">full</string>
+
+    <!--Wallpaper Quality-->
+    <string-array name="wallpaper_quality_options">
+        <item>@string/quality_screen</item>
+        <item>@string/quality_raw</item>
+        <item>@string/quality_full</item>
+        <item>@string/quality_regular</item>
+        <item>@string/quality_small</item>
+        <item>@string/quality_thumb</item>
+    </string-array>
+    <string-array name="wallpaper_quality_values">
+        <item>screen</item>
+        <item>raw</item>
+        <item>full</item>
+        <item>regular</item>
+        <item>small</item>
+        <item>thumb</item>
+    </string-array>
     <string name="default_wallpaper_quality_value" translatable="false">full</string>
 
     <!--Auto Wallpaper Interval-->
