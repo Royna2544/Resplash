@@ -27,6 +27,11 @@ The internet’s source of freely-usable images. Powered by creators everywhere.
 
 <img src="https://raw.githubusercontent.com/b-lam/b-lam.github.io/master/img/resplash/resplash_1.jpg" width="225"> <img src="https://raw.githubusercontent.com/b-lam/b-lam.github.io/master/img/resplash/resplash_3.jpg" width="225"> <img src="https://raw.githubusercontent.com/b-lam/b-lam.github.io/master/img/resplash/resplash_2.jpg" width="225">
 
+# Upstream issues
+
+This is a fork of [b-lam/Resplash](https://github.com/b-lam/Resplash). [ISSUES.md](ISSUES.md) lists
+every open upstream issue and what has been done about it here.
+
 # Build
 
 Requires JDK 17 or newer (JDK 21 recommended, the JBR shipped with Android Studio works) and the
