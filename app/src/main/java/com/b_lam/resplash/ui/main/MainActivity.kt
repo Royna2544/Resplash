@@ -3,6 +3,7 @@ package com.b_lam.resplash.ui.main
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +13,8 @@ import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -38,7 +41,6 @@ import com.b_lam.resplash.util.CustomTabsHelper
 import com.b_lam.resplash.util.isFirebaseAvailable
 import com.b_lam.resplash.util.livedata.observeEvent
 import com.b_lam.resplash.util.loadPhotoUrl
-import com.b_lam.resplash.util.requestPermission
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.inappmessaging.FirebaseInAppMessagingDisplay
@@ -56,6 +58,24 @@ class MainActivity : BaseActivity(R.layout.activity_main) {
 
     override val binding: ActivityMainBinding by viewBinding()
 
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    /**
+     * Auto Wallpaper and downloads report progress through notifications, which need a runtime
+     * permission from Android 13 on. Ask once, the system stops showing the dialog by itself after
+     * the user has made up their mind.
+     */
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -63,9 +83,7 @@ class MainActivity : BaseActivity(R.layout.activity_main) {
         with(binding) {
             setSupportActionBar(bottomAppBar)
 
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requestPermission(Manifest.permission.POST_NOTIFICATIONS, requestCode = 1)
-            }
+            requestNotificationPermissionIfNeeded()
 
             val fragmentPagerAdapter =
                 MainFragmentPagerAdapter(this@MainActivity, supportFragmentManager)

@@ -3,7 +3,6 @@ package com.b_lam.resplash.di
 import androidx.work.WorkerParameters
 import com.b_lam.resplash.worker.AutoWallpaperWorker
 import com.b_lam.resplash.worker.DownloadWorker
-import com.b_lam.resplash.worker.FutureAutoWallpaperWorker
 import com.b_lam.resplash.worker.MuzeiWorker
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module
@@ -17,14 +16,6 @@ val workerModule = module {
             photoRepository = get(),
             autoWallpaperRepository = get(),
             downloadService = get(),
-            notificationManager = get()
-        )
-    }
-    worker { (workerParams: WorkerParameters) ->
-        FutureAutoWallpaperWorker(
-            context = get(),
-            params = workerParams,
-            sharedPreferencesRepository = get(),
             notificationManager = get()
         )
     }

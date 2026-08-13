@@ -235,7 +235,15 @@ class AutoWallpaperWorker(
             val SOURCE_ENTITLED = listOf(COLLECTIONS, USER, SEARCH)
         }
 
-        //Schedule wallpaper to change now regardless of conditions and schedule future change
+        /**
+         * Change the wallpaper right now, regardless of the configured conditions, and restart the
+         * recurring job so that the next automatic change is a full interval away.
+         *
+         * The recurring job is re-enqueued straight away rather than being cancelled and recreated
+         * later by a delayed worker. A delayed worker is easy to lose - an aggressive OEM battery
+         * manager or a force stop is enough - and losing it used to leave Auto Wallpaper with no
+         * scheduled work at all, so it only ever changed again when the user pressed next by hand.
+         */
         fun scheduleSingleAutoWallpaperJob(
             context: Context,
             sharedPreferencesRepository: SharedPreferencesRepository,
@@ -243,30 +251,21 @@ class AutoWallpaperWorker(
         ) {
             with(sharedPreferencesRepository) {
                 if (autoWallpaperEnabled) {
-                    val data = getAutoWallpaperWorkData(sharedPreferencesRepository)
                     val request = OneTimeWorkRequestBuilder<AutoWallpaperWorker>()
-                        .setInputData(data)
+                        .setInputData(getAutoWallpaperWorkData(sharedPreferencesRepository))
                         .setBackoffCriteria(
                             BackoffPolicy.EXPONENTIAL,
                             WorkRequest.MIN_BACKOFF_MILLIS,
                             TimeUnit.MILLISECONDS
                         )
                         .build()
-                    val requestFuture = OneTimeWorkRequestBuilder<FutureAutoWallpaperWorker>()
-                        .setInitialDelay(autoWallpaperInterval, TimeUnit.MINUTES)
-                        .build()
 
-                    WorkManager.getInstance(context).cancelUniqueWork(AUTO_WALLPAPER_JOB_ID)
                     WorkManager.getInstance(context).enqueueUniqueWork(
                         AUTO_WALLPAPER_SINGLE_JOB_ID,
                         ExistingWorkPolicy.REPLACE,
                         request
                     )
-                    WorkManager.getInstance(context).enqueueUniqueWork(
-                        AUTO_WALLPAPER_FUTURE_JOB_ID,
-                        ExistingWorkPolicy.REPLACE,
-                        requestFuture
-                    )
+                    scheduleAutoWallpaperJob(context, sharedPreferencesRepository, notificationManager)
                 } else {
                     cancelAllWork(context, notificationManager)
                 }
@@ -285,21 +284,18 @@ class AutoWallpaperWorker(
                     val constraints = Constraints.Builder()
                         .setRequiredNetworkType( if (autoWallpaperOnWifi) NetworkType.UNMETERED else NetworkType.NOT_REQUIRED )
                         .setRequiresCharging(autoWallpaperCharging)
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        constraints.setRequiresDeviceIdle(autoWallpaperIdle)
-                    }
+                        .setRequiresDeviceIdle(autoWallpaperIdle)
 
                     val request = PeriodicWorkRequestBuilder<AutoWallpaperWorker>(autoWallpaperInterval, TimeUnit.MINUTES)
                         .setInputData(data)
                         .setConstraints(constraints.build())
                         .build()
 
-                    WorkManager.getInstance(context).cancelUniqueWork(AUTO_WALLPAPER_SINGLE_JOB_ID)
+                    // Left over from the versions that rescheduled through a delayed worker
                     WorkManager.getInstance(context).cancelUniqueWork(AUTO_WALLPAPER_FUTURE_JOB_ID)
                     WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                         AUTO_WALLPAPER_JOB_ID,
-                        ExistingPeriodicWorkPolicy.REPLACE,
+                        ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
                         request
                     )
                 } else {
@@ -331,18 +327,5 @@ class AutoWallpaperWorker(
             WorkManager.getInstance(context).cancelUniqueWork(AUTO_WALLPAPER_JOB_ID)
             notificationManager.hideNewAutoWallpaperNotification()
         }
-    }
-}
-
-class FutureAutoWallpaperWorker(
-    private val context: Context,
-    params: WorkerParameters,
-    private val sharedPreferencesRepository: SharedPreferencesRepository,
-    private val notificationManager: NotificationManager
-) : Worker(context, params) {
-
-    override fun doWork(): Result {
-        AutoWallpaperWorker.scheduleAutoWallpaperJob(context, sharedPreferencesRepository, notificationManager)
-        return Result.success()
     }
 }

@@ -1,5 +1,6 @@
 package com.b_lam.resplash.util
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -36,6 +37,22 @@ class NotificationManager(private val context: Context) {
         }
     }
 
+    /**
+     * Post a notification, but only when the app is actually allowed to.
+     *
+     * Since Android 13 POST_NOTIFICATIONS is a runtime permission, and NotificationManagerCompat
+     * throws a SecurityException when it has not been granted. Auto Wallpaper posts from a worker,
+     * so an unguarded notify() would take the whole wallpaper change down with it.
+     */
+    private fun notify(id: Int, notification: Notification) {
+        if (!notificationManager.areNotificationsEnabled()) return
+        try {
+            notificationManager.notify(id, notification)
+        } catch (e: SecurityException) {
+            error("Not allowed to post notification $id", e)
+        }
+    }
+
     fun cancelNotification(id: Int) {
         notificationManager.cancel(id)
     }
@@ -48,7 +65,7 @@ class NotificationManager(private val context: Context) {
             setProgress(0, 0, true)
             setTimeoutAfter(60_000)
         }
-        notificationManager.notify(AUTO_WALLPAPER_TILE_NOTIFICATION_ID, builder.build())
+        notify(AUTO_WALLPAPER_TILE_NOTIFICATION_ID, builder.build())
     }
 
     fun showTileServiceErrorNotification() {
@@ -57,7 +74,7 @@ class NotificationManager(private val context: Context) {
             setSmallIcon(R.drawable.ic_resplash_24dp)
             setContentTitle(context.getString(R.string.error_setting_wallpaper))
         }
-        notificationManager.notify(AUTO_WALLPAPER_TILE_NOTIFICATION_ID, builder.build())
+        notify(AUTO_WALLPAPER_TILE_NOTIFICATION_ID, builder.build())
     }
 
     fun hideTileServiceNotification() {
@@ -93,7 +110,7 @@ class NotificationManager(private val context: Context) {
             setProgress(0, 0, false)
             setAutoCancel(true)
         }
-        notificationManager.notify(fileName.hashCode(), builder.build())
+        notify(fileName.hashCode(), builder.build())
     }
 
     fun showDownloadErrorNotification(fileName: String) {
@@ -104,7 +121,7 @@ class NotificationManager(private val context: Context) {
             setContentText(context.getString(R.string.oops))
             setProgress(0, 0, false)
         }
-        notificationManager.notify(fileName.hashCode(), builder.build())
+        notify(fileName.hashCode(), builder.build())
     }
 
     fun showNewAutoWallpaperNotification(
@@ -128,7 +145,7 @@ class NotificationManager(private val context: Context) {
             }
             setOngoing(persist)
         }
-        notificationManager.notify(NEW_AUTO_WALLPAPER_NOTIFICATION_ID, builder.build())
+        notify(NEW_AUTO_WALLPAPER_NOTIFICATION_ID, builder.build())
     }
 
     fun hideNewAutoWallpaperNotification() {
@@ -136,6 +153,7 @@ class NotificationManager(private val context: Context) {
     }
 
     fun isNewAutoWallpaperNotificationEnabled(preferenceValue: Boolean): Boolean {
+        if (!notificationManager.areNotificationsEnabled()) return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = notificationManager.getNotificationChannel(NEW_AUTO_WALLPAPER_CHANNEL_ID)
             channel != null && channel.importance != NotificationManager.IMPORTANCE_NONE

@@ -1,7 +1,9 @@
 package com.b_lam.resplash.service
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.IBinder
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
@@ -39,13 +41,31 @@ class AutoWallpaperTileService: TileService(), LifecycleOwner, KoinComponent {
                     notificationManager.showTileServiceDownloadingNotification()
                     AutoWallpaperWorker.scheduleSingleAutoWallpaperJob(this@AutoWallpaperTileService, get(), get())
                 }
-                else -> unlockAndRun {
-                    Intent(this@AutoWallpaperTileService, AutoWallpaperSettingsActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        startActivityAndCollapse(this)
-                    }
-                }
+                else -> unlockAndRun { openAutoWallpaperSettings() }
             }
+        }
+    }
+
+    /**
+     * Android 14 turned `startActivityAndCollapse(Intent)` into a hard error, so the tile has to
+     * hand the platform a PendingIntent instead.
+     */
+    @Suppress("DEPRECATION")
+    private fun openAutoWallpaperSettings() {
+        val intent = Intent(this, AutoWallpaperSettingsActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startActivityAndCollapse(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            )
+        } else {
+            startActivityAndCollapse(intent)
         }
     }
 
