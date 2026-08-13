@@ -17,7 +17,7 @@ class RoutingActivity : AppCompatActivity() {
         routeIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         routeIntent(intent)
     }

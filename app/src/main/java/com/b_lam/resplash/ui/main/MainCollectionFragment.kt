@@ -2,11 +2,11 @@ package com.b_lam.resplash.ui.main
 
 import com.b_lam.resplash.ui.collection.CollectionAdapter
 import com.b_lam.resplash.ui.collection.CollectionFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class MainCollectionFragment : CollectionFragment() {
 
-    private val sharedViewModel: MainViewModel by sharedViewModel()
+    private val sharedViewModel: MainViewModel by activityViewModel()
 
     override val pagedListAdapter =
         CollectionAdapter(itemEventCallback, true, sharedPreferencesRepository)

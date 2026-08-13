@@ -13,7 +13,7 @@ import com.b_lam.resplash.R
 import com.b_lam.resplash.databinding.ActivitySettingsBinding
 import com.b_lam.resplash.ui.base.BaseActivity
 import com.b_lam.resplash.util.setupActionBar
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : BaseActivity(R.layout.activity_settings) {
@@ -55,7 +55,7 @@ class SettingsActivity : BaseActivity(R.layout.activity_settings) {
     class SettingsFragment :
         PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
-        private val sharedViewModel: SettingsViewModel by sharedViewModel()
+        private val sharedViewModel: SettingsViewModel by activityViewModel()
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.settings_preferences, rootKey)

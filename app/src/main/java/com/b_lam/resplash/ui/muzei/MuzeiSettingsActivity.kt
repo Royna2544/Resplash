@@ -18,7 +18,7 @@ import com.b_lam.resplash.util.setupActionBar
 import com.b_lam.resplash.util.toast
 import com.b_lam.resplash.worker.AutoWallpaperWorker
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MuzeiSettingsActivity : BaseActivity(R.layout.activity_muzei_settings) {
@@ -43,7 +43,7 @@ class MuzeiSettingsActivity : BaseActivity(R.layout.activity_muzei_settings) {
 
     class SettingsFragment : PreferenceFragmentCompat() {
 
-        private val sharedViewModel: MuzeiSettingsViewModel by sharedViewModel()
+        private val sharedViewModel: MuzeiSettingsViewModel by activityViewModel()
 
         private val sharedPreferencesRepository: SharedPreferencesRepository by inject()
 

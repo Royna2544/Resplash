@@ -43,11 +43,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.inappmessaging.FirebaseInAppMessagingDisplay
 import com.google.firebase.inappmessaging.FirebaseInAppMessagingDisplayCallbacks
-import com.google.firebase.inappmessaging.ktx.inAppMessaging
+import com.google.firebase.inappmessaging.inAppMessaging
 import com.google.firebase.inappmessaging.model.CardMessage
 import com.google.firebase.inappmessaging.model.InAppMessage
 import com.google.firebase.inappmessaging.model.MessageType
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity(R.layout.activity_main) {

@@ -16,11 +16,11 @@ import com.b_lam.resplash.databinding.BottomSheetSearchPhotoFilterBinding
 import com.b_lam.resplash.domain.photo.SearchPhotoDataSource
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class SearchPhotoFilterBottomSheet : BottomSheetDialogFragment() {
 
-    private val sharedViewModel: SearchViewModel by sharedViewModel()
+    private val sharedViewModel: SearchViewModel by activityViewModel()
 
     private val binding: BottomSheetSearchPhotoFilterBinding by viewBinding(CreateMethod.INFLATE)
 

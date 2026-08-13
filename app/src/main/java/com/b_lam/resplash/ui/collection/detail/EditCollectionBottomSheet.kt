@@ -17,11 +17,11 @@ import com.b_lam.resplash.util.livedata.observeEvent
 import com.b_lam.resplash.util.toast
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class EditCollectionBottomSheet : BottomSheetDialogFragment() {
 
-    private val sharedViewModel: CollectionDetailViewModel by sharedViewModel()
+    private val sharedViewModel: CollectionDetailViewModel by activityViewModel()
 
     private val binding: BottomSheetEditCollectionBinding by viewBinding(CreateMethod.INFLATE)
 

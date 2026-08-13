@@ -76,7 +76,9 @@ class BillingRepository(
 
     private fun instantiateAndConnectToPlayBillingService() {
         billingClient = BillingClient.newBuilder(application.applicationContext)
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
+            )
             .setListener(this)
             .build()
         if (!billingClient.isReady) {
@@ -163,9 +165,10 @@ class BillingRepository(
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(productList)
             .build()
-        billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+        billingClient.queryProductDetailsAsync(params) { billingResult, queryResult ->
             when (billingResult.responseCode) {
                 BillingClient.BillingResponseCode.OK -> {
+                    val productDetailsList = queryResult.productDetailsList
                     if (productDetailsList.isNotEmpty()) {
                         productsWithProductDetails.postValue(
                             productDetailsList.associateBy { it.productId }

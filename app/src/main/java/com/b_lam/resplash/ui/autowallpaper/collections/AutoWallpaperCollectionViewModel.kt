@@ -14,7 +14,7 @@ import com.b_lam.resplash.util.Result
 import com.b_lam.resplash.util.error
 import com.b_lam.resplash.util.livedata.Event
 import com.google.firebase.firestore.Source
-import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 

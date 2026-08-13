@@ -13,11 +13,11 @@ import com.b_lam.resplash.ui.photo.detail.PhotoDetailActivity
 import com.b_lam.resplash.ui.user.UserActivity
 import com.b_lam.resplash.ui.user.UserAdapter
 import com.b_lam.resplash.ui.user.UserViewHolder
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class SearchUserFragment : BaseSwipeRecyclerViewFragment<User, UserViewHolder>() {
 
-    private val sharedViewModel: SearchViewModel by sharedViewModel()
+    private val sharedViewModel: SearchViewModel by activityViewModel()
 
     private val itemEventCallback = object : UserAdapter.ItemEventCallback {
 

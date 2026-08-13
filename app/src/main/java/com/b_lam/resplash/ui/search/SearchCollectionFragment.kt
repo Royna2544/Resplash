@@ -5,11 +5,11 @@ import android.view.View
 import com.b_lam.resplash.R
 import com.b_lam.resplash.ui.collection.CollectionAdapter
 import com.b_lam.resplash.ui.collection.CollectionFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class SearchCollectionFragment : CollectionFragment() {
 
-    private val sharedViewModel: SearchViewModel by sharedViewModel()
+    private val sharedViewModel: SearchViewModel by activityViewModel()
 
     override val pagedListAdapter =
         CollectionAdapter(itemEventCallback, true, sharedPreferencesRepository)

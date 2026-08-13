@@ -15,13 +15,13 @@ import com.b_lam.resplash.ui.collection.detail.CollectionDetailActivity
 import com.b_lam.resplash.ui.widget.recyclerview.SpacingItemDecoration
 import com.b_lam.resplash.util.showSnackBar
 import cz.intik.overflowindicator.SimpleSnapHelper
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class DiscoverAutoWallpaperCollectionFragment :
     Fragment(R.layout.fragment_discover_auto_wallpaper_collection),
     AutoWallpaperCollectionListAdapter.ItemEventCallback {
 
-    private val sharedViewModel: AutoWallpaperCollectionViewModel by sharedViewModel()
+    private val sharedViewModel: AutoWallpaperCollectionViewModel by activityViewModel()
 
     private val binding: FragmentDiscoverAutoWallpaperCollectionBinding by viewBinding()
 

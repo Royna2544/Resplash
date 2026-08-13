@@ -17,11 +17,11 @@ import com.b_lam.resplash.util.loadProfilePicture
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.internal.NavigationMenuView
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class MainBottomNavigationDrawer : BottomSheetDialogFragment() {
 
-    private val sharedViewModel: MainViewModel by sharedViewModel()
+    private val sharedViewModel: MainViewModel by activityViewModel()
 
     private val navigationDrawerBinding:
             BottomSheetMainNavigationDrawerBinding by viewBinding(CreateMethod.INFLATE)

@@ -34,7 +34,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AutoWallpaperSettingsActivity :
@@ -160,7 +160,7 @@ class AutoWallpaperSettingsActivity :
     class SettingsFragment :
         PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
-        private val sharedViewModel: AutoWallpaperSettingsViewModel by sharedViewModel()
+        private val sharedViewModel: AutoWallpaperSettingsViewModel by activityViewModel()
 
         private val sharedPreferencesRepository: SharedPreferencesRepository by inject()
         private val notificationManager: NotificationManager by inject()

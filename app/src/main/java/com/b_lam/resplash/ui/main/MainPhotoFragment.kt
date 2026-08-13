@@ -2,11 +2,11 @@ package com.b_lam.resplash.ui.main
 
 import com.b_lam.resplash.ui.photo.PhotoAdapter
 import com.b_lam.resplash.ui.photo.PhotoFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class MainPhotoFragment : PhotoFragment() {
 
-    private val sharedViewModel: MainViewModel by sharedViewModel()
+    private val sharedViewModel: MainViewModel by activityViewModel()
 
     override val pagedListAdapter =
         PhotoAdapter(itemEventCallback, true, sharedPreferencesRepository)

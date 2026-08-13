@@ -65,7 +65,7 @@ class LoginActivity : BaseActivity(R.layout.activity_login) {
         customTabsSession = null
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent?.data?.let { uri ->
             if (uri.authority.equals(unsplashAuthCallback)) {

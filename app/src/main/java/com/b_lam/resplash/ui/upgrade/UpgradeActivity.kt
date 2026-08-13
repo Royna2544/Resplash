@@ -14,9 +14,9 @@ import com.b_lam.resplash.util.setupActionBar
 import com.b_lam.resplash.util.toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.analytics.analytics
+import com.google.firebase.analytics.logEvent
+import com.google.firebase.Firebase
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UpgradeActivity : BaseActivity(R.layout.activity_upgrade) {

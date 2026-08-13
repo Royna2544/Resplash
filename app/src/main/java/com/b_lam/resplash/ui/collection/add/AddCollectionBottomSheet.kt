@@ -26,11 +26,11 @@ import com.b_lam.resplash.util.Result
 import com.b_lam.resplash.util.toast
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class AddCollectionBottomSheet : BottomSheetDialogFragment(), AddCollectionAdapter.ItemEventCallback {
 
-    private val sharedViewModel: PhotoDetailViewModel by sharedViewModel()
+    private val sharedViewModel: PhotoDetailViewModel by activityViewModel()
 
     private val binding: BottomSheetAddCollectionBinding by viewBinding(CreateMethod.INFLATE)
 

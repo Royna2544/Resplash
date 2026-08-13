@@ -5,11 +5,11 @@ import android.view.View
 import com.b_lam.resplash.ui.photo.PhotoAdapter
 import com.b_lam.resplash.ui.photo.PhotoFragment
 import com.b_lam.resplash.util.livedata.observeOnce
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class CollectionDetailFragment : PhotoFragment() {
 
-    private val sharedViewModel: CollectionDetailViewModel by sharedViewModel()
+    private val sharedViewModel: CollectionDetailViewModel by activityViewModel()
 
     override val pagedListAdapter =
         PhotoAdapter(itemEventCallback, true, sharedPreferencesRepository)
